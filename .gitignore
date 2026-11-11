@@ -23,11 +23,11 @@ venv/
 htmlcov/
 
 # Local Supabase state
-supabase/.temp/
-supabase/.branches/
-supabase/.env
-supabase/.env.*
-supabase/config.local.toml
+server/supabase/.temp/
+server/supabase/.branches/
+server/supabase/.env
+server/supabase/.env.*
+server/supabase/config.local.toml
 
 # Editor and OS
 .DS_Store

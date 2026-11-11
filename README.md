@@ -7,8 +7,8 @@ Bash test scripts and their `test.json` manifests live in the separate [connecti
 ## Stack
 
 - The probe is Python 3.13 running in Docker.
-- The server and frontend use Next.js with TypeScript in `server/frontend/`.
-- The backend uses Supabase at the repository root (Postgres, Auth, Storage, Edge Functions).
+- The web app uses Next.js and TypeScript in `server/frontend/`.
+- The backend uses Supabase at `server/supabase/` (Postgres, Auth, Storage, Edge Functions).
 
 ## Prerequisites
 
@@ -19,7 +19,13 @@ Bash test scripts and their `test.json` manifests live in the separate [connecti
 
 ### Backend
 
-From the repository root:
+The Supabase project lives in `server/supabase/`, and the Supabase CLI is a pinned dev dependency of the tooling package in `server/`. From `server/`, install the tooling once:
+
+```bash
+npm ci
+```
+
+Then start the local backend:
 
 ```bash
 npx supabase start
@@ -32,6 +38,14 @@ When you are finished, stop the backend:
 npx supabase stop
 ```
 
+#### Migrations
+
+Add schema changes as timestamped SQL files in `server/supabase/migrations/`, then apply them locally with `npx supabase migration up` from `server/`. Do not edit the remote database by hand; commit migrations so everyone can reproduce the schema.
+
+#### Local reset
+
+`npx supabase db reset --local` from `server/` replaces all local database data, then replays every migration in order and loads `server/supabase/seed.sql`. The seed file is for synthetic local development rows only.
+
 ### Frontend
 
 ```bash
@@ -41,6 +55,8 @@ npm run dev
 ```
 
 The frontend is currently a placeholder.
+
+End-to-end tests use Playwright; see the [server README](server/README.md#playwright) for how to run them.
 
 ### Probe
 

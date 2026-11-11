@@ -1,0 +1,9 @@
+{
+  "name": "connectivity-server-tooling",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local tooling for the Connectivity server, including the Supabase CLI.",
+  "devDependencies": {
+    "supabase": "2.122.0"
+  }
+}

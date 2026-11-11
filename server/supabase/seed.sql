@@ -1,0 +1,3 @@
+-- Synthetic local seed rows for development only.
+-- Loaded automatically by `npx supabase db reset` (see [db.seed] in config.toml).
+-- Do not add real probe identities, locations, or measurement data here.
