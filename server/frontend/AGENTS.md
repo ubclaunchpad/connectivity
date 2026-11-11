@@ -8,12 +8,15 @@ Run from `server/frontend`:
 
 ```bash
 npm ci
+npm run test:unit
 npm run build
 npx playwright install chromium
 npm test
 ```
 
-`npm test` runs the Playwright suite in `tests/e2e/`. Install Chromium once in a fresh environment before running the suite. Use `npm ci` for reproducible installs and keep `server/frontend/package-lock.json` committed.
+`npm run test:unit` runs browser-free tests in `tests/unit/` using `playwright.unit.config.ts`; it needs no browser install or running server. `npm test` runs the browser Playwright suite in `tests/e2e/` using `playwright.config.ts`. Install Chromium once in a fresh environment before running the browser suite. Use `npm ci` for reproducible installs and keep `server/frontend/package-lock.json` committed.
+
+Place browser-free tests in `tests/unit/` and browser tests in `tests/e2e/`. CI runs the unit suite in the frontend job before the build, and the browser suite after the build.
 
 ## Environment
 

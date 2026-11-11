@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:unit": "playwright test --config=playwright.unit.config.ts"
   },
   "dependencies": {
     "next": "^16.0.0",

@@ -41,10 +41,21 @@ If the frontend needs Supabase locally, copy `.env.example` to `.env.local` in `
 
 ## Playwright
 
-End-to-end tests live in `server/frontend/`. From `server/frontend/`, run:
+Tests live in `server/frontend/`. From `server/frontend/`, install dependencies first:
 
 ```bash
 npm ci
+```
+
+Run browser-free unit tests without installing Chromium or starting a server:
+
+```bash
+npm run test:unit
+```
+
+Run the browser-based end-to-end tests after installing Chromium and building the app:
+
+```bash
 npm run build
 npx playwright install chromium
 npm test
