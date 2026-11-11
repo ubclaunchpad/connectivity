@@ -1,0 +1,35 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Node
+node_modules/
+.next/
+out/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local Supabase state
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+supabase/.env.*
+supabase/config.local.toml
+
+# Editor and OS
+.DS_Store
+.idea/
+.vscode/

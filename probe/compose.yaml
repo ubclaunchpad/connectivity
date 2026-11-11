@@ -1,0 +1,12 @@
+services:
+  probe:
+    build:
+      context: .
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - revision-cache:/var/lib/probe
+
+volumes:
+  revision-cache:
