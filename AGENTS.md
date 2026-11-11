@@ -44,6 +44,6 @@ The probe validates `PROBE_ID`, `BACKEND_URL`, and `PROBE_TOKEN`, prints `config
 
 Backend (from `server/`):
 
-Install dependencies with `npm ci` from `server/`, then use the Supabase CLI from the same directory. See the [README](README.md) for local setup and the CLI service commands.
+Install dependencies with `npm ci` from `server/`, then use the Supabase CLI from the same directory. Run database tests with `npx supabase test db`. See the [README](README.md) for local setup and the CLI service commands.
 
 For frontend changes, use the scoped commands in `server/frontend/AGENTS.md`. Run the checks for every area you change.

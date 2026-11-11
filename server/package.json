@@ -4,6 +4,6 @@
   "private": true,
   "description": "Local tooling for the Connectivity server, including the Supabase CLI.",
   "devDependencies": {
-    "supabase": "2.122.0"
+    "supabase": "3.1.0"
   }
 }

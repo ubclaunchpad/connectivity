@@ -44,7 +44,17 @@ Add schema changes as timestamped SQL files in `server/supabase/migrations/`, th
 
 #### Local reset
 
-`npx supabase db reset --local` from `server/` replaces all local database data, then replays every migration in order and loads `server/supabase/seed.sql`. The seed file is for synthetic local development rows only.
+`npx supabase db reset` from `server/` replaces all local database data, then replays every migration in order and loads `server/supabase/seed.sql`. The seed file is for synthetic local development rows only.
+
+#### Database tests
+
+Database tests use pgTAP and live in `server/supabase/tests/database/`. With the local backend running, run them from `server/`:
+
+```bash
+npx supabase test db
+```
+
+Future migrations should add tests for their schema changes, constraints, functions, and RLS policies. Keep fixtures synthetic, and wrap tests in a transaction that rolls back. See the [server README](server/README.md#database-tests) for details.
 
 ### Frontend
 
