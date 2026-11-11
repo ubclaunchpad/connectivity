@@ -1,0 +1,135 @@
+name: Connectivity CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: server/frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: server/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run tests
+        run: npm test
+
+      - name: Upload Playwright results
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-results
+          path: |
+            server/frontend/playwright-report/
+            server/frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  supabase:
+    name: Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start local database
+        run: npx supabase db start
+
+      - name: Reset local database
+        run: npx supabase db reset --local
+
+      - name: Lint database schema
+        run: npx supabase db lint --local --schema public --fail-on error
+
+  probe:
+    name: Probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PROBE_ID: 00000000-0000-4000-8000-000000000000
+      BACKEND_URL: https://example.org
+      PROBE_TOKEN: ci-placeholder
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Build probe image
+        run: docker build --tag connectivity-probe:ci ./probe
+
+      - name: Run probe with valid configuration
+        run: |
+          docker run --rm \
+            --env PROBE_ID \
+            --env BACKEND_URL \
+            --env PROBE_TOKEN \
+            connectivity-probe:ci
+
+      - name: Assert probe fails without a token
+        shell: bash
+        run: |
+          set +e
+          output=$(docker run --rm \
+            --env PROBE_ID \
+            --env BACKEND_URL \
+            connectivity-probe:ci 2>&1)
+          status=$?
+          set -e
+
+          echo "$output"
+
+          if [ "$status" -eq 0 ]; then
+            echo "Expected the probe to fail when PROBE_TOKEN is missing" >&2
+            exit 1
+          fi
+
+          if ! grep -q "PROBE_TOKEN is required" <<< "$output"; then
+            echo "Expected the probe to print 'PROBE_TOKEN is required'" >&2
+            exit 1
+          fi
