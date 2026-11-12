@@ -4,7 +4,7 @@ Connectivity collects internet measurements from distributed probes. Keep change
 
 ## Repository layout
 
-- `probe/` — probe software: Python 3.13, packaged with `pyproject.toml`, and run in Docker through `compose.yaml`.
+- `probe/` — probe software: Python 3.13, packaged with `pyproject.toml`, locked with uv, and run in Docker through `compose.yaml`.
 - `server/frontend/` — Next.js and TypeScript frontend: Node.js 22 (see `.nvmrc`) and npm.
 - `server/supabase/` — backend for the server (Postgres, Auth, Storage, Edge Functions). Its configuration lives at `server/supabase/config.toml`; run Supabase CLI commands from `server/`.
 
@@ -29,20 +29,23 @@ Keep `.agents/skills/` and `skills-lock.json` in sync with the official skills, 
 
 This repository is public. Do not commit credentials, API keys, tokens, private endpoints, `.env*` values, or probe identities and locations. Keep local values in ignored environment files.
 
-Commit dependency lockfiles whenever they change: `server/frontend/package-lock.json`, `server/package-lock.json`, and `skills-lock.json`.
+Commit dependency lockfiles whenever they change, including `probe/uv.lock`, `server/frontend/package-lock.json`, `server/package-lock.json`, and `skills-lock.json`.
 
 ## Checks
 
-Probe (from `probe/`):
+Run the probe checks from `probe/`.
 
 ```bash
+uv run --locked --extra test python -m pytest
 docker compose --env-file .env.example config --quiet
 docker compose up --build
 ```
 
-The probe validates `PROBE_ID`, `BACKEND_URL`, and `PROBE_TOKEN`, prints `config valid`, and exits. For a non-Docker check, run `PYTHONPATH=src python3 -m probe` with those variables set.
+The probe validates `PROBE_ID`, `BACKEND_URL`, and `PROBE_TOKEN`, prints `config valid`, and exits. For a non-Docker check, run `uv run --locked python -m probe` with those variables set.
 
-Probe unit tests live in `probe/tests/`. Set up the Python 3.13 virtualenv as described in [probe/README.md](probe/README.md#tests), then run `python -m pytest` from `probe/` using that environment.
+Probe unit tests live in `probe/tests/`. `uv` reads `probe/.python-version`, so run the commands from `probe/`. Dependencies are declared in `probe/pyproject.toml`; add new Python dependencies with `uv add` and commit `probe/pyproject.toml` and `probe/uv.lock` together.
+
+The Docker build runs `uv sync --locked --no-dev --no-editable` in a builder stage and copies `/app/.venv` into a `python:3.13-slim` final stage. The final image keeps Bash and `iputils-ping`, excludes uv and the test extra, and runs `python -m probe` from the copied virtualenv.
 
 Backend (from `server/`):
 

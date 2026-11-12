@@ -12,25 +12,28 @@ Copy `.env.example` to `.env` for local values and keep `.env` out of version co
 
 ## Local check
 
+Install uv by following the [official uv installation guide](https://docs.astral.sh/uv/getting-started/installation/), then run this command from `probe/`.
+
 ```bash
 PROBE_ID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb \
 BACKEND_URL=https://example.org \
 PROBE_TOKEN=dev-placeholder \
-PYTHONPATH=src python3 -m probe
+uv run --locked python -m probe
 ```
 
 ## Tests
 
-Unit tests live in `tests/` and run with pytest under Python 3.13. Run these commands from `probe/` and activate a virtualenv before installing the test extra:
+Unit tests live in `tests/` and run with pytest under Python 3.13. Run this command from `probe/`.
 
 ```bash
-python3.13 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e ".[test]"
-python -m pytest
+uv run --locked --extra test python -m pytest
 ```
 
+`uv run` syncs the environment before running, so no separate `uv sync` call is needed. `uv` reads `.python-version` and installs Python 3.13 when needed. Add new Python dependencies with `uv add` and commit `pyproject.toml` and `uv.lock` together, and commit `.python-version` whenever it changes.
+
 ## Container
+
+The image builds dependencies from the lockfile into `/app/.venv` and runs the probe with that interpreter. The final stage does not include `uv` or the test extra.
 
 ```bash
 docker compose --env-file .env.example config --quiet
