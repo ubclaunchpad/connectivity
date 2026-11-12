@@ -9,6 +9,12 @@ description = "Connectivity probe bootstrap configuration check"
 requires-python = ">=3.13"
 dependencies = []
 
+[project.optional-dependencies]
+test = ["pytest>=9,<10"]
+
 [tool.setuptools]
 package-dir = { "" = "src" }
 packages = ["probe"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

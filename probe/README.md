@@ -19,6 +19,17 @@ PROBE_TOKEN=dev-placeholder \
 PYTHONPATH=src python3 -m probe
 ```
 
+## Tests
+
+Unit tests live in `tests/` and run with pytest under Python 3.13. Run these commands from `probe/` and activate a virtualenv before installing the test extra:
+
+```bash
+python3.13 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[test]"
+python -m pytest
+```
+
 ## Container
 
 ```bash

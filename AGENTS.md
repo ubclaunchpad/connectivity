@@ -42,6 +42,8 @@ docker compose up --build
 
 The probe validates `PROBE_ID`, `BACKEND_URL`, and `PROBE_TOKEN`, prints `config valid`, and exits. For a non-Docker check, run `PYTHONPATH=src python3 -m probe` with those variables set.
 
+Probe unit tests live in `probe/tests/`. Set up the Python 3.13 virtualenv as described in [probe/README.md](probe/README.md#tests), then run `python -m pytest` from `probe/` using that environment.
+
 Backend (from `server/`):
 
 Install dependencies with `npm ci` from `server/`, then use the Supabase CLI from the same directory. Run database tests with `npx supabase test db`. See the [README](README.md) for local setup and the CLI service commands.
