@@ -34,6 +34,18 @@ Schema changes live in `server/supabase/migrations/` as timestamped SQL files. C
 
 `npx supabase db reset` replaces all local database data, then replays all migrations and loads `server/supabase/seed.sql`. Seeding is enabled in `[db.seed]` in `server/supabase/config.toml`; keep seed data synthetic.
 
+### Local test revision fixture
+
+For database-only work, the SQL seed is sufficient. Local demo downloads also need the two seeded revision files in the private `test-revisions` bucket, which seeding does not populate. Clone [connectivity-tests](https://github.com/ubclaunchpad/connectivity-tests) alongside the `connectivity` checkout, so from `server/` it is at `../../connectivity-tests`, then check out the exact commit recorded in `test_revisions.source_commit_sha`. Upload the files from that checkout:
+
+```bash
+npx supabase storage cp ../../connectivity-tests/ping/run.sh ss:///test-revisions/ping/dddddddd-dddd-4ddd-8ddd-dddddddddddd/run.sh --content-type text/x-shellscript --experimental
+npx supabase storage cp ../../connectivity-tests/ping/test.json ss:///test-revisions/ping/dddddddd-dddd-4ddd-8ddd-dddddddddddd/test.json --content-type application/json --experimental
+npx supabase storage ls ss:///test-revisions/ping/dddddddd-dddd-4ddd-8ddd-dddddddddddd --recursive --experimental
+```
+
+The seeded `script_sha256` and `definition_sha256` values verify the uploaded bytes. The synthetic local probe fixture uses probe ID `bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb` and token `connectivity-local-probe-token`; do not reuse these outside local development. Re-run the uploads after `npx supabase db reset` before testing downloads.
+
 ### Database tests
 
 Database tests use pgTAP and live in `server/supabase/tests/database/`. With the local backend running, run them from `server/`:
