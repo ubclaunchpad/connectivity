@@ -23,10 +23,10 @@ values (
     'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
     'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
     1,
-    '62bd52e3533eabcd815c2e63254c0d111bc531dc',
+    '7c841a82cb538f4bdc060ce003c62120dc5dc0ab',
     'ping/dddddddd-dddd-4ddd-8ddd-dddddddddddd/run.sh',
     'ping/dddddddd-dddd-4ddd-8ddd-dddddddddddd/test.json',
-    '1973ef9b4e9fb956b06e6645214939912bac0e39f50d631a9391107376bc3e26',
+    '7f1904e7b928f7e6d07a5201c164df3ef66789964b43d48607478111dbfc35ff',
     'b478fc8687cff81046fd1c3a4707ef7bf105924279d729c950c2a4f8ca8a6c4b',
     '{"test_id":"cccccccc-cccc-4ccc-8ccc-cccccccccccc","name":"Ping","metrics":{"rtt_avg_ms":{"label":"Average latency","type":"number","unit":"ms","nullable":true},"packet_loss_pct":{"label":"Packet loss","type":"number","unit":"%","nullable":false}},"map":{"default_metric":"rtt_avg_ms"}}'::jsonb
 );

@@ -45,10 +45,10 @@ select is(
     '{
         "name": "Ping",
         "version_number": 1,
-        "source_commit_sha": "62bd52e3533eabcd815c2e63254c0d111bc531dc",
+        "source_commit_sha": "7c841a82cb538f4bdc060ce003c62120dc5dc0ab",
         "script_path": "ping/dddddddd-dddd-4ddd-8ddd-dddddddddddd/run.sh",
         "definition_path": "ping/dddddddd-dddd-4ddd-8ddd-dddddddddddd/test.json",
-        "script_sha256": "1973ef9b4e9fb956b06e6645214939912bac0e39f50d631a9391107376bc3e26",
+        "script_sha256": "7f1904e7b928f7e6d07a5201c164df3ef66789964b43d48607478111dbfc35ff",
         "definition_sha256": "b478fc8687cff81046fd1c3a4707ef7bf105924279d729c950c2a4f8ca8a6c4b",
         "definition": {
             "test_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
