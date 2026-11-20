@@ -32,67 +32,81 @@ export async function GET() {
             { status: 500}
         );
     }
+    try {
+        const query = new URLSearchParams({
+            select: [
+                "id",
+                "started_at",
+                "status",
+                "result_data",
+                "probes!measurements_probe_id_fkey(name)",
+                "test_revisions!measurements_test_revision_id_fkey(version_number,definition,tests(name))",
+            ].join(","),
+            order: "received_at.desc",
+            limit: "100",
+        }); 
 
-    const query = new URLSearchParams({
-        select: [
-            "id",
-            "started_at",
-            "status",
-            "result_data",
-            "probes!measurements_probe_id_fkey(name)",
-            "test_revisions!measurements_test_revision_id_fkey(version_number,definition,tests(name))",
-        ].join(","),
-        order: "received_at.desc",
-        limit: "100",
-    }); 
-
-    const response = await fetch(
-        `${url}/rest/v1/measurements?${query}`,
-        {
-            headers: {
-                apikey: key,
+        const response = await fetch(
+            `${url}/rest/v1/measurements?${query}`,
+            {
+                headers: {
+                    apikey: key,
+                },
+                cache: "no-store",
             },
-            cache: "no-store",
-        },
-    );
-    
-    const data: Measurement[] = await response.json();
+        );
 
-    const result = data.map((measurement)=> {
-        const definitions = measurement.test_revisions.definition.metrics;
-        const values = measurement.result_data;
+        if (!response.ok) {
+            return Response.json(
+                { error: "Failed to fetch" },
+                { status: 500 },
+            );
+        }
+        
+        const data: Measurement[] = await response.json();
 
-        const metrics: Record<string, {
-            label: string;
-            unit: string;
-            value: unknown;
-        }> = {};
-        // Combine metric definitions with measured values dynamically
-        for (const name in values) {
-            if (!definitions[name]) {
-                throw new Error("Missing metric definition");
+        const result = data.map((measurement)=> {
+            const definitions = measurement.test_revisions.definition.metrics;
+            const values = measurement.result_data;
+
+            const metrics: Record<string, {
+                label: string;
+                unit: string;
+                value: unknown;
+            }> = {};
+            // Combine metric definitions with measured values dynamically
+            for (const name in values) {
+                // TODO: confirm whether a missing metric definition should fail the entire request or be skipped
+                if (!definitions[name]) {
+                    throw new Error("Missing metric definition");
+                }
+
+                metrics[name] = {
+                    label: definitions[name].label,
+                    unit: definitions[name].unit,
+                    value: values[name],
+                };
             }
 
-            metrics[name] = {
-                label: definitions[name].label,
-                unit: definitions[name].unit,
-                value: values[name],
-            };
-        }
+            return {
+                    id: measurement.id,
+                    probe_name: measurement.probes.name,
+                    test_name: measurement.test_revisions.tests.name,
+                    revision_number: measurement.test_revisions.version_number,
+                    started_at: measurement.started_at,
+                    status: measurement.status,
+                    metrics: metrics,
+            }
+        })
 
-        return {
-                id: measurement.id,
-                probe_name: measurement.probes.name,
-                test_name: measurement.test_revisions.tests.name,
-                revision_number: measurement.test_revisions.version_number,
-                started_at: measurement.started_at,
-                status: measurement.status,
-                metrics: metrics,
-        }
-    })
-
-    return Response.json(
-        { results: result }
-    );
+        return Response.json(
+            { results: result }
+        );
+    } catch {
+        return Response.json(
+            {error: "Failed to retrieve measurement"},
+            {status: 500},
+        );
+    }
 }
     
