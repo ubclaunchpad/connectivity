@@ -46,6 +46,23 @@ npx supabase storage ls ss:///test-revisions/ping/dddddddd-dddd-4ddd-8ddd-dddddd
 
 The seeded `script_sha256` and `definition_sha256` values verify the uploaded bytes. The synthetic local probe fixture uses probe ID `bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb` and token `connectivity-local-probe-token`; do not reuse these outside local development. Re-run the uploads after `npx supabase db reset` before testing downloads.
 
+### Probe check-in function
+
+`POST /functions/v1/probe-check-in` is served from `server/supabase/functions/probe-check-in/`. The probe sends `{"probe_id": "<uuid>"}` with its device token in the `X-Probe-Token` header. Platform JWT verification is off for this function (`[functions.probe-check-in]` in `config.toml`), so the function checks the token itself using `functions/_shared/probe-auth.ts`. Any other probe-facing function must reuse that helper and add its own `verify_jwt = false` block.
+
+A verified probe gets `200` with either `{"assignment": {...}}` (the revision ID plus a signed `download_path` and `sha256` for `script` and `definition`) or `{"assignment": null}`. Download paths start with `/storage/v1/` and resolve against the probe's `BACKEND_URL`; they expire after 5 minutes.
+
+Errors are `{"error": "<code>"}`:
+
+| Status | Code | Meaning |
+|---|---|---|
+| 400 | `invalid_request` | Body is not a JSON object with a UUID `probe_id`. |
+| 401 | `unauthorized` | Missing or wrong token, token for another probe, unknown probe, revoked credential, or disabled probe. Identical for all of them. |
+| 405 | `method_not_allowed` | Not a `POST`. |
+| 500 | `internal_error` | The identity check or the function itself failed. |
+| 500 | `assignment_read_failed` | The assignment or revision could not be read. |
+| 500 | `signing_failed` | The download links could not be signed. |
+
 ### Database tests
 
 Database tests use pgTAP and live in `server/supabase/tests/database/`. With the local backend running, run them from `server/`:
