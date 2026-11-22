@@ -394,6 +394,12 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Probe-facing functions authenticate with a probe token, not a Supabase JWT, so
+# the platform JWT check is off. Each such function must verify the probe itself
+# (see functions/_shared/probe-auth.ts). Add a block like this for every one.
+[functions.probe-check-in]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54427
