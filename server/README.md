@@ -82,3 +82,10 @@ npm run build
 npx playwright install chromium
 npm test
 ```
+
+## Local API
+
+### Recent Measurements
+
+`GET /api/results` returns up to 100 recent measurements, newest received first, with probe name, test name, revision, run time, status, and metrics with labels and units.
+Null metric values are preserved and an empty list is returned when no results are available.
