@@ -60,6 +60,14 @@ If the frontend needs Supabase locally, copy `.env.example` to `.env.local` in `
 
 - `NEXT_PUBLIC_SUPABASE_URL` — the local API URL.
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — the local publishable (anon) key.
+- `SUPABASE_SECRET_KEY` — the local secret key used only by Next.js route handlers.
+
+The local assignment API is available from the Next.js development server at
+`GET /api/probes`, `GET /api/test-revisions`, and
+`PUT /api/probes/<probe-id>/assignment`. The PUT body is
+`{"test_revision_id":"<revision UUID>"}` to assign a revision or
+`{"test_revision_id":null}` to clear it. These routes return 404 outside
+development until dashboard authentication and authorization are implemented.
 
 ## Playwright
 
