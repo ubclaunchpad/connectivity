@@ -41,7 +41,7 @@ docker compose --env-file .env.example config --quiet
 docker compose up --build
 ```
 
-The probe validates `PROBE_ID`, `BACKEND_URL`, and `PROBE_TOKEN`, prints `config valid`, and exits. For a non-Docker check, run `uv run --locked python -m probe` with those variables set.
+The probe validates `PROBE_ID`, `BACKEND_URL`, and `PROBE_TOKEN`, then runs the check-in, test, and upload loop until stopped. For a non-Docker check, run `uv run --locked python -m probe` with those variables set.
 
 Probe unit tests live in `probe/tests/`. `uv` reads `probe/.python-version`, so run the commands from `probe/`. Dependencies are declared in `probe/pyproject.toml`; add new Python dependencies with `uv add` and commit `probe/pyproject.toml` and `probe/uv.lock` together.
 

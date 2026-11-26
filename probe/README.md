@@ -2,7 +2,7 @@
 
 Bootstrap starter for the probe.
 
-The current implementation validates `PROBE_ID`, `BACKEND_URL`, and `PROBE_TOKEN` when run as `python -m probe`, prints `config valid`, and exits. Upcoming tickets cover polling, SQLite storage, test execution, and testing.
+When run as `python -m probe`, it validates `PROBE_ID`, `BACKEND_URL`, and `PROBE_TOKEN`, then loops: check in, download and hash-check the assigned `run.sh` and `test.json`, run `bash run.sh` (30 s deadline, without `PROBE_TOKEN` in its environment), and upload the result. With no assignment it waits 30 s and checks again. A server or download error stops the probe with a message. `SIGTERM` or Ctrl-C stops it after the current pass. Measurement intervals, retries, caching, and queues come later.
 
 ## Configuration
 
