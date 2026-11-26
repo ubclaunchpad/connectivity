@@ -56,6 +56,68 @@ npx supabase test db
 
 Future migrations should add tests for their schema changes, constraints, functions, and RLS policies. Keep fixtures synthetic, and wrap tests in a transaction that rolls back.
 
+## Edge Functions
+
+Probe-facing functions live in `server/supabase/functions/`. They authenticate with the `X-Probe-Token` header instead of a Supabase JWT, so each has `verify_jwt = false` in `config.toml` and checks the token itself with `_shared/probe-auth.ts`. Error bodies are always `{"error":"<code>"}` and never echo request data.
+
+### `POST /functions/v1/probe-measurements`
+
+Uploads the result of one script run. The body has exactly these fields: `schema_version` (1), `id` (the run UUID), `probe_id`, `test_revision_id`, `started_at`, `finished_at`, `status`, `result_code`, `result_data`, and `location`. The server sets `received_at`.
+
+- Timestamps are RFC 3339 with `Z` or an offset and at most microsecond precision. `finished_at` must not be before `started_at`, and neither may be more than 5 minutes in the future.
+- `completed` runs need `result_code` 0 and a `result_data` with exactly the revision's `definition.metrics` keys. Values are finite numbers, or `null` where the metric is `nullable` (Ping latency when every packet is lost).
+- `failed` and `timeout` runs need `result_data` `{}` and an integer or `null` `result_code`.
+- `location` is `null` or `{"latitude": -90..90, "longitude": -180..180, "accuracy_m": >= 0}`; `accuracy_m` is optional.
+
+| Outcome | Status | Body |
+|---|---|---|
+| Saved | 201 | `{"id":"<run id>"}` |
+| Identical repeat; original row and `received_at` kept | 200 | `{"id":"<run id>"}` |
+| Malformed or invalid data, including metrics | 400 | `{"error":"invalid_request"}` |
+| Rejected token, revoked credential, or disabled probe | 401 | `{"error":"unauthorized"}` |
+| Not `POST` | 405 | `{"error":"method_not_allowed"}` |
+| Run ID already saved with different data or by another probe | 409 | `{"error":"conflict"}` |
+| Body over 64 KiB | 413 | `{"error":"payload_too_large"}` |
+| Unknown `test_revision_id` | 422 | `{"error":"unknown_revision"}` |
+| Server failure | 500 | `{"error":"internal_error"}` |
+
+### Function tests
+
+Install [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2, then run from `server/supabase/functions/`:
+
+```bash
+deno lint
+deno check probe-measurements/index.ts
+deno test
+```
+
+Handler tests use a stand-in identity check and an in-memory store, so they need no running backend.
+
+### Local function check
+
+With the local backend running, serve the functions from `server/`:
+
+```bash
+npx supabase functions serve
+```
+
+Save the synthetic example as `/tmp/connectivity-measurement.json`:
+
+```json
+{"schema_version":1,"id":"11111111-1111-4111-8111-111111111111","probe_id":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","test_revision_id":"dddddddd-dddd-4ddd-8ddd-dddddddddddd","started_at":"2026-11-09T20:00:00Z","finished_at":"2026-11-09T20:00:05Z","status":"completed","result_code":0,"result_data":{"rtt_avg_ms":18.4,"packet_loss_pct":0},"location":null}
+```
+
+Then upload it with the synthetic local token:
+
+```bash
+curl -i http://127.0.0.1:54421/functions/v1/probe-measurements \
+  -H 'Content-Type: application/json' \
+  -H 'X-Probe-Token: connectivity-local-probe-token' \
+  --data-binary @/tmp/connectivity-measurement.json
+```
+
+The first upload returns `201`, and sending it again returns `200` with the same ID. `npx supabase db reset` clears saved measurements.
+
 If the frontend needs Supabase locally, copy `.env.example` to `.env.local` in `server/frontend` and use values from `npx supabase status` run in `server/`:
 
 - `NEXT_PUBLIC_SUPABASE_URL` — the local API URL.

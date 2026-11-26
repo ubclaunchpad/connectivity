@@ -56,6 +56,10 @@ npx supabase test db
 
 Future migrations should add tests for their schema changes, constraints, functions, and RLS policies. Keep fixtures synthetic, and wrap tests in a transaction that rolls back. See the [server README](server/README.md#database-tests) for details.
 
+#### Edge Functions
+
+Probe-facing Edge Functions live in `server/supabase/functions/`. Their tests use [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2; see the [server README](server/README.md#edge-functions) for the endpoint contract, test commands, and a local upload check.
+
 ### Frontend
 
 ```bash
