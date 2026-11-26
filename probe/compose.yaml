@@ -2,6 +2,8 @@ services:
   probe:
     build:
       context: .
+    # Let a pass in progress (script deadline plus upload) finish on stop.
+    stop_grace_period: 1m
     env_file:
       - path: .env
         required: false

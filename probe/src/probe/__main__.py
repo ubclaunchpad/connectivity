@@ -1,11 +1,15 @@
-"""Probe bootstrap configuration check."""
+"""Probe entry point: validate configuration, then run the probe loop."""
 
 from __future__ import annotations
 
 import os
+import signal
 import sys
+import threading
 import uuid
 from urllib.parse import urlsplit
+
+from probe.runner import Config, ProbeError, run_loop
 
 
 def validate_config() -> list[str]:
@@ -50,7 +54,14 @@ def main() -> int:
             print(error, file=sys.stderr)
         return 1
 
-    print("config valid")
+    stop = threading.Event()
+    signal.signal(signal.SIGTERM, lambda *_: stop.set())
+    signal.signal(signal.SIGINT, lambda *_: stop.set())
+    try:
+        run_loop(Config.from_env(), stop)
+    except ProbeError as error:
+        print(f"probe stopped: {error}", file=sys.stderr)
+        return 1
     return 0
 
 
