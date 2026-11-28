@@ -51,4 +51,14 @@ Backend (from `server/`):
 
 Install dependencies with `npm ci` from `server/`, then use the Supabase CLI from the same directory. Run database tests with `npx supabase test db`. See the [README](README.md) for local setup and the CLI service commands.
 
+Edge Functions live in `server/supabase/functions/` and use Deno 2. Run their checks from that directory:
+
+```bash
+deno lint
+deno check probe-measurements/index.ts
+deno test
+```
+
+Probe-facing functions set `verify_jwt = false` in `server/supabase/config.toml` and must verify `X-Probe-Token` with `_shared/probe-auth.ts`. Never log tokens, request bodies, or service keys. Commit `server/supabase/functions/deno.lock` when it changes.
+
 For frontend changes, use the scoped commands in `server/frontend/AGENTS.md`. Run the checks for every area you change.
